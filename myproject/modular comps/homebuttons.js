@@ -6,7 +6,7 @@ export const HomeButtons = ({id, name}) =>{
         return(
             <View style={styles.featuresButton}>
                 <ImageBackground 
-                    source={require('../assets/feature1.jpg')}
+                    source={require('../assets/imgs/feature1.jpg')}
                     style={styles.imgStyle}
                 >
                     <Text style={styles.featureText1}>{name}</Text>
@@ -17,7 +17,7 @@ export const HomeButtons = ({id, name}) =>{
         return(
             <View style={styles.featuresButton}>
                 <ImageBackground 
-                    source={require('../assets/feature2.jpg')}
+                    source={require('../assets/imgs/feature2.jpg')}
                     style={styles.imgStyle}
                 >
                     <Text style={styles.featureText2}>{name}</Text>
@@ -25,17 +25,22 @@ export const HomeButtons = ({id, name}) =>{
             </View>
         )
     }
-
+        
 }
+
+
+
 const styles= StyleSheet.create({
     featuresButton:{
         marginBottom: 40,
         height: 215,
         width: 215,
         borderRadius: 50,
-        borderWidth: 2,
+        borderWidth: 4,
         borderStyle: 'dashed',
-        borderColor: 'rgb(72, 150, 112)',
+        borderColor: 'white'
+        // borderColor: '#5399DF',
+        // borderColor: 'white',
     },
     featureText1:{
         color: 'white',
@@ -56,7 +61,7 @@ const styles= StyleSheet.create({
         width:200,
         borderRadius: 50,
         overflow: 'hidden',
-        marginLeft: 5,
-        marginTop: 5,
+        marginLeft: 3,
+        marginTop: 3,
     },
 })
