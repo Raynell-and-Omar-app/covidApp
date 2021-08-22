@@ -1,27 +1,23 @@
 import React from 'react';
 import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, FlatList } from 'react-native';
 import { HomeButtons } from '../modular comps/homebuttons'
+import { globalStyle } from '../styles/globalStyle';
 
-
-export const Home = () =>{
+export const Home = ({ navigation }) =>{
   //Features so far
   const features = [
     {id: 1, name: "Country Tracker"},
     {id: 2, name: "Symptoms"}
   ]
 
-  const featurePress = () =>{
-    console.log('FlatList pressed');
-  }
-
 
   return (
-    <View style={style.screen}>
+    <View style={globalStyle.screen}>
       <ImageBackground source={require('../assets/imgs/corona3.jpg')} style={style.body}>
 
         {/* header */}
-        <View style={style.header}>
-          <Text style={style.headerText}> COVID-19 App </Text>
+        <View style={globalStyle.header}>
+          <Text style={globalStyle.headerText}> COVID-19 App </Text>
         </View>
 
         {/* Features button */}
@@ -30,12 +26,20 @@ export const Home = () =>{
               data={features}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) =>{
-                    return(
-                        <TouchableOpacity onPress={featurePress}>
+                //attaching appropriate onPress event handler based on feature pressed
+                if(item.id === 1){
+                  return(
+                    <TouchableOpacity onPress={() => navigation.navigate("TrackerStack")}>
                             <HomeButtons id={item.id} name={item.name}/>
-                        </TouchableOpacity>
-                    )
-
+                    </TouchableOpacity>
+                  )
+                }else{
+                  return(
+                    <TouchableOpacity onPress={() => navigation.navigate("SymptomsStack")}>
+                            <HomeButtons id={item.id} name={item.name}/>
+                    </TouchableOpacity>
+                  )
+                }
               }}    
           />
         </View>
@@ -47,31 +51,15 @@ export const Home = () =>{
 
 
 
-const style = StyleSheet.create({
-  screen:{
-    flex: 1,
-  },  
+const style = StyleSheet.create({  
   featureContainer:{
-      flex: 1,
-      alignItems: 'center',
-      marginTop: 60,
+    flex: 1,
+    alignItems: 'center',
+    marginTop: 60,
   },
   body: {   
-     width: '100%',
-     height: '100%',   
-  },
-  header :{
-    backgroundColor: '#5399DF',
-    height: '10%',
-    borderColor: 'white',
-  },
-  headerText:{
-    color: '#fff',
-    fontSize: 28,
     width: '100%',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    marginTop: 20
-  }
+    height: '100%',   
+  },
 })
  
