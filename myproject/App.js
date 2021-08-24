@@ -1,16 +1,8 @@
-import { StatusBar } from 'expo-status-bar';
-import React, {useState} from 'react';
-import { Home } from './screens/homescreen'
-import { AppNavigator } from './routes/homeStack';
-
-
+import React from 'react';
+import  AppNavigator  from './routes/drawer';
 
 export default function App(){
   return (
-    // <Home />
-    <AppNavigator />    
+      <AppNavigator></AppNavigator>
   );
 }
-
-
-

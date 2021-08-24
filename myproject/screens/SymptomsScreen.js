@@ -1,16 +1,12 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { globalStyle } from '../styles/globalStyle';
+import { StatusBar } from 'expo-status-bar';
 
 export const Symptoms = () =>{
     return(
         <View style={globalStyle.screen}>
-            {/* Header */}
-            <View style={globalStyle.header}>
-                <Text style={globalStyle.headerText}>Symptoms Screen</Text>
-            </View>
-            
-
+            <StatusBar hidden />
         </View>
     )
 }

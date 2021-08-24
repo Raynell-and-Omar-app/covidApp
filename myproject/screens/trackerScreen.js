@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
 import { globalStyle } from '../styles/globalStyle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CountryPicker from 'react-native-country-picker-modal';
+
 
 export const Tracker = () =>{
 
@@ -48,23 +50,26 @@ export const Tracker = () =>{
 
     return(
         <View style={globalStyle.screen}>
-            {/* Header */}
-            <View style={globalStyle.header}>
-                <Text style={globalStyle.headerText}>Tracker Screen</Text>
-            </View>
 
             {/* Body */}
             <View style={{alignItems:'center'}}>
-                <TextInput
-                    style={{marginTop: 30, fontSize: 20, marginBottom: 20, borderBottomWidth: 1}}
-                    placeholder="Country..."
-                    onChangeText={(text) => setcountry(text)}
-                />
+                <TouchableOpacity>
+                    <View  style={globalStyle.countrySelectButton}>  
+                        <CountryPicker placeholder={"Select Country"}  withCallingCode={false} withCountryNameButton={true} 
+                                        withFilter={true} theme={{backgroundColor:"#5399DF", fontSize:18, onBackgroundTextColor:"white"}} withAlphaFilter={true} 
+                                        onSelect={(country) => (
+                                                    setcountry(country.name)
+                                                )}>  
+                        </CountryPicker>
+                    </View>
+                </TouchableOpacity>
                 {/* Storing country choices */}
+                <View style={globalStyle.buttonBox}>
                 <Button title='Store'  onPress={storeData}/>
 
                 {/* Getting latest data from JHU databse for chosen countries */}
                 <Button title='Get'  onPress={getData}/>
+                </View>
             </View>
 
         </View>
