@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //storing in device storage
-export const storeData = async (value, flag, setStateTracker, settingInitialDataTracker) =>{
+export const storeData = async (value, setStateTracker, settingInitialDataTracker) =>{
     //checking if have stored in storage the country list before
     AsyncStorage.getItem('countries')
     .then(countryList =>{
@@ -39,11 +39,11 @@ export const storeData = async (value, flag, setStateTracker, settingInitialData
                             try{
                                 //adding country choice for the first time
                                 if(countryList.length === 0){
-                                    countryList.push({id: "1", country: value, countryFlag: flag});
+                                    countryList.push({id: "1", country: value});
                                     AsyncStorage.setItem('countries', JSON.stringify(countryList));
                                 //adding new choice with previous choices
                                 }else{
-                                    countryList.push({id: (countryList.length + 1).toString(), country: value, countryFlag: flag});
+                                    countryList.push({id: (countryList.length + 1).toString(), country: value});
                                     AsyncStorage.setItem('countries', JSON.stringify(countryList));
                                 }
 

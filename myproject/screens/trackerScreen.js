@@ -26,9 +26,10 @@ export const Tracker = () =>{
     console.log("Using state: ", countryList)
 
     //adding new choices
-    const storingData = (countryName, flag) =>{ 
-        storeData(countryName, flag, setCountryList, settingNewData);
+    const storingData = (countryName) =>{ 
+        storeData(countryName, setCountryList, settingNewData);
     }
+
     //getting the data for country choices
     const gettingData = () =>{ getData(); }
 
@@ -44,7 +45,7 @@ export const Tracker = () =>{
                                         withAlphaFilter={true} 
                                         withEmoji={false}
                                         onSelect={(value) => {
-                                            storingData(value.name, value.flag);
+                                            storingData(value.name);
                                         }}
                         />
                     </View>
