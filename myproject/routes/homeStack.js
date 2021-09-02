@@ -86,7 +86,7 @@ export default ({navigation}) => (
 const style = StyleSheet.create({
   buttons: {
     paddingHorizontal: 5 
-    }
+  }
 })
 
 

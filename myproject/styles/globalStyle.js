@@ -1,4 +1,3 @@
-import React from 'react';
 import { StyleSheet } from 'react-native';
 
 export const globalStyle = StyleSheet.create({
@@ -19,14 +18,14 @@ export const globalStyle = StyleSheet.create({
         backgroundColor: '#e6f9ff',
     },
     countrySelectButton: {
-        alignSelf:"center", 
+        justifyContent: 'center',
         alignItems:"center",
         backgroundColor:"#66B2FF",
         marginTop: 65,
         borderWidth:3,
         borderRadius:10,
-        width:130,
-        
+        width:150,
+        height:40,
         borderColor:"blue",  
         },
     buttonBox: {

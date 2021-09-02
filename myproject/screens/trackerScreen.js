@@ -1,52 +1,36 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
+import { View, Text, Button, TouchableOpacity, FlatList } from 'react-native';
 import { globalStyle } from '../styles/globalStyle';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import CountryPicker from 'react-native-country-picker-modal';
+import { storeData, getData } from '../ModularFuncs/StoreGetCases';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import  Card  from '../ModularFuncs/card';
 
+//getting data from local storage when launched again
+const intializingData = async() =>{
+    const data = await AsyncStorage.getItem('countries')
+    return data;
+}
+//when Launching app for the first time we get data promise
+const data = intializingData();
 
+//resetting Data when there is a change to retain state in Tracker component while re-rendering
+const settingNewData = (newData) =>{
+    data._W = newData;
+}
+
+console.log("re-render");
 export const Tracker = () =>{
+    console.log(data);
+    const [countryList, setCountryList] = useState(data._W !== null ? JSON.parse(data._W) : []);
+    console.log("Using state: ", countryList)
 
-    const [country, setcountry] =  useState("");
-    const storeData = async () =>{
-        //Store only if submitted a country
-        if(country !== ""){
-            try{
-                //initializing 'USER' as a key
-                await AsyncStorage.setItem('USER', country);
-                console.log('Succesful from storeData', country);
-            }catch(e){
-                console.log("Error from storeData: ", e);
-            }
-        }else{
-            console.log("Input field empty....")
-        }
+    //adding new choices
+    const storingData = (countryName, flag) =>{ 
+        storeData(countryName, flag, setCountryList, settingNewData);
     }
-
-    const getData = async () =>{
-        const data = await AsyncStorage.getItem('USER');
-        try{
-            //if retrieving successful
-            if(data !== null){
-                //getting previous day's date
-                const date = new Date();
-                const today = `${date.getFullYear()}-0${date.getMonth() + 1}-${date.getDate() - 1}`;
-                //fetching cases data
-                console.log(`Getting data for ${data}`);
-                //Getting data from JHU
-                const response = await fetch(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/covid-19-qppza/service/REST-API/incoming_webhook/global?country=${data}&min_date=${today}&hide_fields=_id,%20country,%20country_code,%20country_iso2,%20country_iso3,%20loc,%20state,%20uid`)
-                if(response.status !== 200)
-                    console.log("Error occured when fetching data...");
-                else{
-                    var cases = await response.json();
-                    console.log(cases);
-                    console.log('latest confirmed:', cases[0].confirmed_daily);
-                }
-            }  
-        }catch(e){
-            console.log('Error from getData: ', e);
-        }
-    }
+    //getting the data for country choices
+    const gettingData = () =>{ getData(); }
 
     return(
         <View style={globalStyle.screen}>
@@ -55,24 +39,39 @@ export const Tracker = () =>{
             <View style={{alignItems:'center'}}>
                 <TouchableOpacity>
                     <View  style={globalStyle.countrySelectButton}>  
-                        <CountryPicker placeholder={"Select Country"}  withCallingCode={false} withCountryNameButton={true} 
-                                        withFilter={true} theme={{backgroundColor:"#5399DF", fontSize:18, onBackgroundTextColor:"white"}} withAlphaFilter={true} 
-                                        onSelect={(country) => (
-                                                    setcountry(country.name)
-                                                )}>  
-                        </CountryPicker>
+                        <CountryPicker  placeholder={"Add Country"}  withCallingCode={false} withCountryNameButton={true} 
+                                        withFilter={true} theme={{backgroundColor:"#5399DF", fontSize:18, onBackgroundTextColor:"white"}} 
+                                        withAlphaFilter={true} 
+                                        withEmoji={false}
+                                        onSelect={(value) => {
+                                            storingData(value.name, value.flag);
+                                        }}
+                        />
                     </View>
                 </TouchableOpacity>
-                {/* Storing country choices */}
-                <View style={globalStyle.buttonBox}>
-                <Button title='Store'  onPress={storeData}/>
+            </View>
+            
+            {/* Displaying the choices */}
+            <FlatList
+                style={{padding:20}}
+                data={countryList}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) =>{
+                    return(
+                        <TouchableOpacity onPress={() => console.log(item.country)}>
+                            <Card>
+                                <Text style={{color: 'black'}}>{item.country}</Text>
+                            </Card>
+                        </TouchableOpacity>
+                    )
+                }}
+            />
 
-                {/* Getting latest data from JHU databse for chosen countries */}
-                <Button title='Get'  onPress={getData}/>
-                </View>
+            {/* Getting latest data from JHU databse for chosen countries and then clearing storage*/}
+            <View style={globalStyle.buttonBox}>
+                <Button title='Get' onPress={gettingData}/>
             </View>
 
         </View>
     )
 }
-

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, FlatList, Button } from 'react-native';
 import { HomeButtons } from '../modular comps/homebuttons'
 import { globalStyle } from '../styles/globalStyle';
 import { StatusBar } from 'expo-status-bar';
@@ -8,7 +8,7 @@ export const Home = ({ navigation }) =>{
   //Features so far
   const features = [
     {id: 1, name: "Country Tracker"},
-    {id: 2, name: "Symptoms"}
+    {id: 2, name: "Symptoms"},
   ]
 
   return (
@@ -45,7 +45,6 @@ export const Home = ({ navigation }) =>{
               }}    
           />
         </View>
-
       </ImageBackground>
     </View>
   );
