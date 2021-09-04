@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //storing in device storage
-export const storeData = async (value, setStateTracker, settingInitialDataTracker) =>{
+export const storeData = async (value, setStateTracker, settingInitialDataTracker, storingOrDeleting) =>{
     //checking if have stored in storage the country list before
     AsyncStorage.getItem('countries')
     .then(countryList =>{
@@ -127,6 +127,59 @@ export const getData = async () =>{
 
     //temporarily for production
     AsyncStorage.clear();
+}
+
+
+export const deleteData = async (setStateTracker, settingInitialDataTracker, countryID) =>{
+    //checking if have stored in storage the country list before
+    AsyncStorage.getItem('countries')
+    .then(countryList =>{
+
+        //Empty lists for countries and CountryList
+        countryListCopy = [];
+        selectedCountries = [];
+        
+        countryList = JSON.parse(countryList);
+        console.log(countryList);
+        
+        //Getting list of selected countries
+        for(i = 0; i < countryList.length; i++){
+            selectedCountries.push(countryList[i].country);
+        }
+
+        //Logging selected countries
+        console.log(selectedCountries);
+
+        //Creating new Country List without the deleted Country
+        for (let i = 1; i < countryList.length+1; i++) {
+            if (i < parseInt(countryID)){
+                countryListCopy.push({id:(i).toString(), country: selectedCountries[i-1]});
+            } if (i > parseInt(countryID)) {
+                countryListCopy.push({id:(i-1).toString(), country: selectedCountries[i-2]})
+             } 
+             if ( i == parseInt(countryID)) {
+                selectedCountries.splice(parseInt(countryID)-1,1);
+                console.log("Selected countries inside ELSE:",selectedCountries);
+                
+            }
+        }
+
+        //Logging selected countries and country List after deletion
+        console.log("Selected countries:",selectedCountries);
+        console.log("Country list copy:",countryListCopy);
+
+        countryList = countryListCopy;
+        console.log("new country list:",countryList);
+
+        AsyncStorage.setItem('countries', JSON.stringify(countryList));
+        setStateTracker(countryList);
+        settingInitialDataTracker(JSON.stringify(countryList)); 
+ 
+    })
+    //some error while ding the first getItem call in the function
+    .catch(e =>{
+        console.log('Error while deleting data: ', e);
+    })
 }
 
 
