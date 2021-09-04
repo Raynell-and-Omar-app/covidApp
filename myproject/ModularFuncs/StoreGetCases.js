@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { Alert } from 'react-native';
 //storing in device storage
 export const storeData = async (value, setStateTracker, settingInitialDataTracker, storingOrDeleting) =>{
     //checking if have stored in storage the country list before
@@ -30,7 +30,9 @@ export const storeData = async (value, setStateTracker, settingInitialDataTracke
                     .then(cases =>{
                         //No data monitored for selected country(value)
                         if(cases.length === 0){
-                            console.log('No data available for this country');
+                            Alert.alert('Sorry!','Data not available for this country',[
+                                {text: 'Choose another country'}
+                            ])
                         }
 
                         //data available
@@ -124,9 +126,6 @@ export const getData = async () =>{
     .catch(e =>{
         console.log('Error caught in retrieving data: ', e);
     })
-
-    //temporarily for production
-    AsyncStorage.clear();
 }
 
 

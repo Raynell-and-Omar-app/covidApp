@@ -13,8 +13,9 @@ export default function Card(props){
 
 const styles = StyleSheet.create({
     card:{
-        height:50,
-        alignItems:'center',
+        // padding: 20,
+        height:90,
+        // alignItems:'center',
         justifyContent:'center',
         borderRadius: 6,
         elevation: 3,
@@ -27,6 +28,8 @@ const styles = StyleSheet.create({
         shadowRadius: 2
     },
     cardContent:{
+        // alignItems:'center',
+        justifyContent:'center',
         marginHorizontal: 18,
         marginVertical: 10,
     },
