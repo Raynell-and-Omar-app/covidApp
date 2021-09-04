@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Button, TouchableOpacity, FlatList } from 'react-native';
 import { globalStyle } from '../styles/globalStyle';
 import CountryPicker from 'react-native-country-picker-modal';
-import { storeData, getData } from '../ModularFuncs/StoreGetCases';
+import { storeData, getData, deleteData } from '../ModularFuncs/StoreGetCases';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import  Card  from '../ModularFuncs/card';
 
@@ -30,8 +30,13 @@ export const Tracker = () =>{
         storeData(countryName, setCountryList, settingNewData);
     }
 
+    const deletingData = (countryID) => {
+        deleteData(setCountryList, settingNewData, countryID)
+    }
+
     //getting the data for country choices
     const gettingData = () =>{ getData(); }
+
 
     return(
         <View style={globalStyle.screen}>
@@ -53,21 +58,22 @@ export const Tracker = () =>{
             </View>
             
             {/* Displaying the choices */}
-            <View style={{flex:1, marginTop:10, padding: 20}}>
-                <FlatList
-                    data={countryList}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) =>{
-                        return(
-                            <TouchableOpacity onPress={() => console.log(item.country)}>
-                                <Card>
-                                    <Text style={{color: 'black'}}>{item.country}</Text>
-                                </Card>
-                            </TouchableOpacity>
-                        )
-                    }}
-                />
-            </View>
+
+            <FlatList
+                style={{padding:20}}
+                data={countryList}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) =>{
+                    return(
+                        <TouchableOpacity onPress={() => console.log(item.country, item.id)}>
+                            <Card>
+                                <Text style={{color: 'black'}}>{item.country}</Text>
+                                <Button title='Delete' onPress={() => deletingData(item.id)}></Button>
+                            </Card>
+                        </TouchableOpacity>
+                    )
+                }}
+            />
 
             {/* Getting latest data from JHU databse for chosen countries and then clearing storage*/}
             <View style={globalStyle.buttonBox}>
