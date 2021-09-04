@@ -43,7 +43,7 @@ export const Tracker = () =>{
                         <CountryPicker  placeholder={"Add Country"}  withCallingCode={false} withCountryNameButton={true} 
                                         withFilter={true} theme={{backgroundColor:"#5399DF", fontSize:18, onBackgroundTextColor:"white"}} 
                                         withAlphaFilter={true} 
-                                        withEmoji={false}
+                                        withEmoji
                                         onSelect={(value) => {
                                             storingData(value.name);
                                         }}
@@ -53,20 +53,21 @@ export const Tracker = () =>{
             </View>
             
             {/* Displaying the choices */}
-            <FlatList
-                style={{padding:20}}
-                data={countryList}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) =>{
-                    return(
-                        <TouchableOpacity onPress={() => console.log(item.country)}>
-                            <Card>
-                                <Text style={{color: 'black'}}>{item.country}</Text>
-                            </Card>
-                        </TouchableOpacity>
-                    )
-                }}
-            />
+            <View style={{flex:1, marginTop:10, padding: 20}}>
+                <FlatList
+                    data={countryList}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) =>{
+                        return(
+                            <TouchableOpacity onPress={() => console.log(item.country)}>
+                                <Card>
+                                    <Text style={{color: 'black'}}>{item.country}</Text>
+                                </Card>
+                            </TouchableOpacity>
+                        )
+                    }}
+                />
+            </View>
 
             {/* Getting latest data from JHU databse for chosen countries and then clearing storage*/}
             <View style={globalStyle.buttonBox}>

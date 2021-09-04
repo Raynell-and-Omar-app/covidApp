@@ -13,6 +13,9 @@ export default function Card(props){
 
 const styles = StyleSheet.create({
     card:{
+        height:50,
+        alignItems:'center',
+        justifyContent:'center',
         borderRadius: 6,
         elevation: 3,
         backgroundColor:'rgb(170, 214, 250)',
