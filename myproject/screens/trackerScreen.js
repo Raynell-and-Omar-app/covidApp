@@ -67,18 +67,22 @@ export const Tracker = () =>{
                             <TouchableOpacity onPress={() => console.log("Population: ", item.population)}>
                                 <Card>
                                     {/* <Text style={{color: 'black', marginBottom: 8}}>{(item.country).toUpperCase()}{"\n\n"}Daily Cases: {item.casesDaily}{"\n"}Daily Deaths: {item.deathsDaily}{"\n"}Cases:{item.cases}{"\n"}Deaths:{item.deaths}</Text> */}
-                                    <View><Text style={{color: 'black', marginTop: 10, textAlign:"center"}}>{(item.country).toUpperCase()}{"\n"}</Text></View>
-                                    <View style={{flexDirection:"row"}}>
+                                    <View style={{textAlign:"center", alignSelf:"center"}}><Text style={{fontWeight:"bold" ,color: 'black', borderBottomLeftRadius:10, borderBottomRightRadius:10, borderTopLeftRadius:3, borderTopRightRadius:3 ,marginTop: 5,paddingTop: 5, textAlign:"center", backgroundColor:"red", alignSelf:"flex-start", flexDirection:"row", padding: 10, alignItems:"center" ,height:32, borderRadius: 3, borderWidth:2, backgroundColor:"#66B2FF"}}>{(item.country).toUpperCase()}{"\n"}</Text></View>
+                                    <View style={{flexDirection:"row", paddingTop:4, width:"100%"}}>
                                         <View  style={{textAlign:"left",marginTop:5, height:"90%"}}>
                                             <Text>Daily{"\n"}Cases: {item.casesDaily}{"\n"}Deaths: {item.deathsDaily}</Text>
                                             {/* <Text  style={{textAlign:"left"}}>Cases: {item.casesDaily}</Text>
                                             <Text  style={{textAlign:"left"}}>Deaths: {item.deathsDaily}</Text> */}
                                         </View>
-                                        <View  style={{textAlign:"right", width: "80%", height:"90%"}}>
+                                        <View  style={{textAlign:"right", width: "100%", height:"90%"}}>
                                         <Text style={{paddingBottom:15, paddingLeft:120, marginTop: 5}}>Total{"\n"}Cases: {item.cases}{"\n"}Deaths: {item.deaths}</Text>                                        
                                         </View>
-                                    </View>    
-                                    <View style={{width:"100%"}}><Button title='Delete' onPress={() => deletingData(item.id)}/></View>
+                                    </View>
+                                    <View style={{flexDirection:"row", width:"100%"}}>    
+                                    <View style={{width:"25%"}}><Button title='X' onPress={() => deletingData(item.id)}/></View>
+                                    <View style={{width:"75%", paddingLeft: 5}}><Button title='Population' onPress={() => Alert.alert("The population of "+item.country+" is "+item.population)}/></View>
+
+                                    </View>
                                     <Text></Text>
                                 
                                 </Card>
