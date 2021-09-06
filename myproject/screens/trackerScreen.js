@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Button, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, Button, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { globalStyle } from '../styles/globalStyle';
 import CountryPicker from 'react-native-country-picker-modal';
 import { storeData, getData, deleteData } from '../ModularFuncs/StoreGetCases';
@@ -64,10 +64,23 @@ export const Tracker = () =>{
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) =>{
                         return(
-                            <TouchableOpacity onPress={() => console.log(item.country, item.id)}>
+                            <TouchableOpacity onPress={() => console.log("Population: ", item.population)}>
                                 <Card>
-                                    <Text style={{color: 'black', marginBottom: 20}}>{item.country}</Text>
-                                    <Button title='Delete' onPress={() => deletingData(item.id)}/>
+                                    {/* <Text style={{color: 'black', marginBottom: 8}}>{(item.country).toUpperCase()}{"\n\n"}Daily Cases: {item.casesDaily}{"\n"}Daily Deaths: {item.deathsDaily}{"\n"}Cases:{item.cases}{"\n"}Deaths:{item.deaths}</Text> */}
+                                    <View><Text style={{color: 'black', marginTop: 10, textAlign:"center"}}>{(item.country).toUpperCase()}{"\n"}</Text></View>
+                                    <View style={{flexDirection:"row"}}>
+                                        <View  style={{textAlign:"left",marginTop:5, height:"90%"}}>
+                                            <Text>Daily{"\n"}Cases: {item.casesDaily}{"\n"}Deaths: {item.deathsDaily}</Text>
+                                            {/* <Text  style={{textAlign:"left"}}>Cases: {item.casesDaily}</Text>
+                                            <Text  style={{textAlign:"left"}}>Deaths: {item.deathsDaily}</Text> */}
+                                        </View>
+                                        <View  style={{textAlign:"right", width: "80%", height:"90%"}}>
+                                        <Text style={{paddingBottom:15, paddingLeft:120, marginTop: 5}}>Total{"\n"}Cases: {item.cases}{"\n"}Deaths: {item.deaths}</Text>                                        
+                                        </View>
+                                    </View>    
+                                    <View style={{width:"100%"}}><Button title='Delete' onPress={() => deletingData(item.id)}/></View>
+                                    <Text></Text>
+                                
                                 </Card>
                             </TouchableOpacity>
                         )
