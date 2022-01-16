@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { Home } from "../screens/homescreen";
 import {Tracker} from "../screens/trackerScreen"
 import {Symptoms} from "../screens/SymptomsScreen"
+import { ViewMore } from "../screens/ViewMoreScreen";
 import {  Alert, Button, StyleSheet, Text, View, Pressable, ImageBackground, TouchableOpacity } from 'react-native';
 
 const Stack = createStackNavigator();
@@ -15,8 +16,8 @@ export default ({navigation}) => (
         headerTitleAlign:"center",
         headerShown:true,
         headerStyle: {
-           height: 55,
-           backgroundColor: '#5399DF',
+          height: 55,
+          backgroundColor: '#5399DF',
         },
         headerTintColor: "#fff",
       }}>
@@ -32,7 +33,7 @@ export default ({navigation}) => (
         name="Tracker"
         component={Tracker}
         options={{
-          title: "Tracker",
+          title: "Country Tracker",
           headerRight: () => (
             <View style={style.buttons}>
             <Button
@@ -55,11 +56,27 @@ export default ({navigation}) => (
         }}
       />
       <Stack.Screen
+        name="ViewMore"
+        component={ViewMore}
+        options={{
+          title:"Detailed",
+          headerLeft: () => (
+            <View style={style.buttons}>
+            <Button
+              onPress={() => navigation.navigate('Tracker')}
+              title="Tracker"
+              color="#66B2FF"
+            />
+            </View>
+          )
+        }}
+      />
+      <Stack.Screen
         name="Symptoms"
         component={Symptoms}
         options={{
           title: "Symptoms",
-          headerRight: () => (
+          headerLeft: () => (
             <View style={style.buttons}>
             <Button
               onPress={() => navigation.navigate('Home')}
@@ -68,10 +85,9 @@ export default ({navigation}) => (
             />
             </View>
           ),
-          headerLeft: () => (
+          headerRight: () => (
             <View style={style.buttons}>
             <Button
-              
               onPress={() => navigation.navigate('Tracker')}
               title="Tracker"
               color="#66B2FF"
@@ -85,7 +101,9 @@ export default ({navigation}) => (
 
 const style = StyleSheet.create({
   buttons: {
-    paddingHorizontal: 5 
+    // width:100,
+    // height:100,
+    paddingHorizontal: 7
   }
 })
 

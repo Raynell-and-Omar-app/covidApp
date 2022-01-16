@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, Button, TouchableOpacity, FlatList, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, TouchableOpacity, FlatList, Alert, StyleSheet } from 'react-native';
 import { globalStyle } from '../styles/globalStyle';
 import CountryPicker from 'react-native-country-picker-modal';
 import { storeData, getData, deleteData } from '../ModularFuncs/StoreGetCases';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import  Card  from '../ModularFuncs/card';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as Notification from 'expo-notifications';
+import * as TaskManager from 'expo-task-manager';
+import * as BackgroundFetch from 'expo-background-fetch';
+
 
 //getting data from local storage when launched again
 const intializingData = async() =>{
@@ -14,16 +19,100 @@ const intializingData = async() =>{
 //when Launching app for the first time we get data promise
 const data = intializingData();
 
-//resetting Data when there is a change to retain state in Tracker component while re-rendering
+//resetting Data when there is a change to update state in Tracker component while re-rendering
 const settingNewData = (newData) =>{
     data._W = newData;
 }
 
-console.log("re-render");
-export const Tracker = () =>{
-    console.log(data);
+
+// setting up background task (setting up a notification along with calling getData())
+
+// name of the task
+// const BACKGROUND_FETCH_TASK = "set notification with cases"
+// // defining the task
+// TaskManager.defineTask(BACKGROUND_FETCH_TASK, async() =>{
+//     console.log("===========Notif Triggered=============");
+//     // const data = await getData();
+//     console.log(data);
+//     Notification.scheduleNotificationAsync({
+//         content:{
+//             title: 'Cases Today',
+//             body: 'data here',
+//         }
+//     })
+
+//     return BackgroundFetch.Result.NoData;
+// })
+
+// // function to call when register the task
+// const registerBackgroundFetchAsync = async() =>{
+//     return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+//         minimumInterval: 5,
+//         stopOnTerminate: false, // works only for android
+//         startOnBoot: true,      // works only for android
+//     });
+// }
+
+// // function to call when unregister the task
+// const unregisterBackgroundFetchAsync = async() =>{
+//     return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+// }
+
+
+
+//                      NOTIFICATION STUFFS (LOOK LATER)
+//scheduling a notification with settingNotification() and listening using Notification.setNotificationHandler()
+// const settingNotification = async () =>{
+//     console.log("===========Notif Triggered=============");
+//     // const data = await getData();
+//     Notification.scheduleNotificationAsync({
+//         content:{
+//             title: 'Cases Today',
+//             body: "data here",
+//         },
+//         trigger:{
+//             seconds: 5
+//             // repeats:true,
+//         },
+//     })
+//     // await Notification.cancelAllScheduledNotificationsAsync();
+
+
+//     // use setinterval to call this function again
+//     // setInterval(settingNotification(), 10000);
+// }
+// Notification.setNotificationHandler({
+//     handleNotification: async() =>({
+//         shouldShowAlert: true,
+//         shouldPlaySound: false,
+//         shouldSetBadge: false, 
+//     }),
+// });
+
+
+
+// tracker functional component
+export const Tracker = ({ navigation }) =>{
+    // code regarding Background fetch
+    // const [isRegisteredBackg, setIsRegisteredBackg] = useState(false);
+    // // constantly being updated
+    // useEffect(() =>{
+    //     checkStatusAsync();
+    // }, []);
+    // // checking status of background task
+    // const checkStatusAsync = async() =>{
+    //     const checkIsRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_FETCH_TASK);
+    //     setIsRegisteredBackg(checkIsRegistered);
+    // }
+    // // function triggered when button pressed (used to toggle registration)
+    // const toggleBackgTask = async() =>{
+    //     if(isRegisteredBackg){ await unregisterBackgroundFetchAsync(); }
+    //     else{ await registerBackgroundFetchAsync(); }
+    //     // calling function to update isRegisteredBackg state
+    //     checkStatusAsync();
+    // }
+
     const [countryList, setCountryList] = useState(data._W !== null ? JSON.parse(data._W) : []);
-    console.log("Using state: ", countryList)
 
     //adding new choices
     const storingData = (countryName) =>{ 
@@ -33,10 +122,6 @@ export const Tracker = () =>{
     const deletingData = (countryID) => {
         deleteData(setCountryList, settingNewData, countryID)
     }
-
-    //getting the data for country choices
-    const gettingData = () =>{ getData(); }
-
 
     return(
         <View style={globalStyle.screen}>
@@ -64,39 +149,79 @@ export const Tracker = () =>{
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) =>{
                         return(
-                            <TouchableOpacity onPress={() => console.log("Population: ", item.population)}>
-                                <Card>
-                                    {/* <Text style={{color: 'black', marginBottom: 8}}>{(item.country).toUpperCase()}{"\n\n"}Daily Cases: {item.casesDaily}{"\n"}Daily Deaths: {item.deathsDaily}{"\n"}Cases:{item.cases}{"\n"}Deaths:{item.deaths}</Text> */}
-                                    <View style={{textAlign:"center", alignSelf:"center"}}><Text style={{fontWeight:"bold" ,color: 'black', borderBottomLeftRadius:10, borderBottomRightRadius:10, borderTopLeftRadius:3, borderTopRightRadius:3 ,marginTop: 5,paddingTop: 5, textAlign:"center", backgroundColor:"red", alignSelf:"flex-start", flexDirection:"row", padding: 10, alignItems:"center" ,height:32, borderRadius: 3, borderWidth:2, backgroundColor:"#66B2FF"}}>{(item.country).toUpperCase()}{"\n"}</Text></View>
-                                    <View style={{flexDirection:"row", paddingTop:4, width:"100%"}}>
-                                        <View  style={{textAlign:"left",marginTop:5, height:"90%"}}>
-                                            <Text>Daily{"\n"}Cases: {item.casesDaily}{"\n"}Deaths: {item.deathsDaily}</Text>
-                                            {/* <Text  style={{textAlign:"left"}}>Cases: {item.casesDaily}</Text>
-                                            <Text  style={{textAlign:"left"}}>Deaths: {item.deathsDaily}</Text> */}
-                                        </View>
-                                        <View  style={{textAlign:"right", width: "100%", height:"90%"}}>
-                                        <Text style={{paddingBottom:15, paddingLeft:120, marginTop: 5}}>Total{"\n"}Cases: {item.cases}{"\n"}Deaths: {item.deaths}</Text>                                        
-                                        </View>
+                            <Card>
+                                <View style={{textAlign:"center", alignSelf:"center"}}>
+                                    <Text style={style.cardHeader}>
+                                        {(item.country).toUpperCase()}{"\n"}
+                                    </Text>
+                                </View>
+                                <View style={{flexDirection:"row", paddingTop:4}}>
+                                    <View style={{paddingBottom:10}}>
+                                        <Text style={style.textStyle}>DAILY{"\n"}Cases: {item.casesDaily}{"\n"}Deaths: {item.deathsDaily}</Text>
                                     </View>
-                                    <View style={{flexDirection:"row", width:"100%"}}>    
-                                    <View style={{width:"25%"}}><Button title='X' onPress={() => deletingData(item.id)}/></View>
-                                    <View style={{width:"75%", paddingLeft: 5}}><Button title='Population' onPress={() => Alert.alert("The population of "+item.country+" is "+item.population)}/></View>
-
+                                    <View style={{marginHorizontal:20}}>
+                                        <Text style={style.textStyle}>TOTAL{"\n"}Cases: {item.cases}{"\n"}Deaths: {item.deaths}</Text>                                        
                                     </View>
-                                    <Text></Text>
-                                
-                                </Card>
-                            </TouchableOpacity>
+                                </View>
+                                <View style={{flexDirection:"row", width:"100%"}}> 
+                                    <View style={{width:"20%", marginRight:20}}>
+                                        <MaterialIcons
+                                            // backgroundColor={Platform.OS === 'ios'? '#007AFF' : '#2196F3'} 
+                                            color={'black'} name='delete' 
+                                            size={35}
+                                            onPress={() => deletingData(item.country)}/>
+                                    </View>
+                                    {/* on pressing this button we navigate to a different screen with graph for item.country */}
+                                    <View style={{width:"75%", paddingLeft: 5, paddingBottom:10}}>
+                                        <Button title='View more' onPress={() => navigation.navigate("ViewMore", {country:item.country})}/>
+                                    </View>
+                                </View>
+                            
+                            </Card>
                         )
                     }}
                 />
             </View>
 
-            {/* Getting latest data from JHU databse for chosen countries and then clearing storage*/}
-            <View style={globalStyle.buttonBox}>
-                <Button title='Get' onPress={gettingData}/>
-            </View>
+
+            {/* Redundant feature */}
+            {/* Getting latest data from JHU databse for chosen countries and then clearing storage and TRIGGER NOTIFFICATIONS*/}
+            {/* <View style={globalStyle.buttonBox}>
+                <Button 
+                title={isRegisteredBackg ? 'Unregister BackgroundFetch task' : 'Register BackgroundFetch task'} 
+                onPress={toggleBackgTask}
+                />
+            </View> */}
 
         </View>
     )
 }
+
+
+
+const style = StyleSheet.create({
+    cardHeader:{
+        fontFamily:'helvetica-neue-regular',
+        fontWeight:"bold", 
+        color: 'black', 
+        borderBottomLeftRadius:10, 
+        borderBottomRightRadius:10, 
+        borderTopLeftRadius:3, 
+        borderTopRightRadius:3,
+        marginTop: 5,
+        paddingTop: 5, 
+        textAlign:"center", 
+        backgroundColor:"red", 
+        alignSelf:"flex-start", 
+        flexDirection:"row", 
+        padding: 10, 
+        alignItems:"center",
+        height:32, 
+        borderRadius: 3, 
+        borderWidth:2, 
+        backgroundColor:"#66B2FF"
+    },
+    textAlign:{
+        fontFamily:'helvetica-neue-regular',
+    },
+})

@@ -1,11 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
+
+
 //storing in device storage
-export const storeData = async (value, setStateTracker, settingInitialDataTracker, storingOrDeleting) =>{
+export const storeData = async (value, setStateTracker, settingInitialDataTracker, scheduleNotification) =>{
     //checking if have stored in storage the country list before
     AsyncStorage.getItem('countries')
     .then(countryList =>{
-        
+        // when no country selected previously or BUG?!
         if(countryList === null){
             countryList=[];
         }else{
@@ -18,7 +20,8 @@ export const storeData = async (value, setStateTracker, settingInitialDataTracke
             const today = new Date();
             const yesterday = new Date(today);
             yesterday.setDate(yesterday.getDate() - 1);
-            const date = `${yesterday.getFullYear()}-${yesterday.getMonth()+1 < 10 ? '0': ''}${yesterday.getMonth() + 1}-${yesterday.getDate() < 10 ? '0': ''}${yesterday.getDate()}`;
+            let date = `${yesterday.getFullYear()}-${yesterday.getMonth()+1 < 10 ? '0': ''}${yesterday.getMonth() + 1}-${yesterday.getDate() < 10 ? '0': ''}${yesterday.getDate()}`;
+            console.log("***************************************", date);
             //setting up proper values
             if(value === "United States") 
                 value = "US";
@@ -33,31 +36,56 @@ export const storeData = async (value, setStateTracker, settingInitialDataTracke
                     .then(cases =>{
                         //No data monitored for selected country(value)
                         if(cases.length === 0){
-                            Alert.alert('Sorry!','Data not available for this country',[
-                                {text: 'Choose another country'}
-                            ])
+                            // checking if update issue or data actually not monitored
+                            yesterday.setDate(yesterday.getDate() - 2);
+                            date = `${yesterday.getFullYear()}-${yesterday.getMonth()+1 < 10 ? '0': ''}${yesterday.getMonth() + 1}-${yesterday.getDate() < 10 ? '0': ''}${yesterday.getDate()}`;
+                            fetch(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/covid-19-qppza/service/REST-API/incoming_webhook/global?country=${value}&min_date=${date}&hide_fields=_id,%20country,%20country_code,%20country_iso2,%20country_iso3,%20loc,%20state,%20uid`)
+                            .then(result =>{
+                                if(result.status !== 200){
+                                    console.log("error while fetching data for verifying if data not actually available");
+                                }else{
+                                    result.json()
+                                    .then(prevCases =>{
+                                        // data not monitored for this country
+                                        if(prevCases.length === 0){
+                                            Alert.alert('Sorry!','This country is not being monitored yet.',[
+                                                {text: 'Choose another country'}
+                                            ]);
+                                        }else{
+                                            Alert.alert('Sorry!','Data not updated for this country yet, Please try again later.\n(Recommended: In a few hours)',[
+                                                {text: 'Choose another country'}
+                                            ]);
+                                        }
+                                    }).catch(e =>{
+                                        console.log("error (from catch) while fetching data for verifying if data not actually available", e);
+                                    })
+                                }
+                            })
                         }
-
                         //data available
                         else{
-                            //console.log(cases);
                             //storing choice in local storage
                             try{
+                                console.log("frome stroe===================(cases)", cases);
                                 //adding country choice for the first time
                                 if(countryList.length === 0){
-                                    countryList.push({id: "1", country: value, casesDaily: (cases[0].confirmed_daily).toString(), deaths: (cases[0].deaths).toString(), cases: (cases[0].confirmed).toString(), deathsDaily: (cases[0].deaths_daily).toString(), population: (cases[0].population).toString()});
+                                    // adding total numbers if list has more than one (i.e., different states)
+                                    var total_number = getTotalNumber(cases);
+                                    countryList.push({id: "1", country: value, casesDaily: (total_number[0] >= 0 ? (total_number[0]).toString() : "0"), deaths: (total_number[1]).toString(), cases: (total_number[2]).toString(), deathsDaily: (total_number[3]).toString(), population: (total_number[4]).toString()});
                                     AsyncStorage.setItem('countries', JSON.stringify(countryList));
                                 //adding new choice with previous choices
                                 }else{
-                                    countryList.push({id: (countryList.length + 1).toString(), country: value,  casesDaily: (cases[0].confirmed_daily).toString(), deaths: (cases[0].deaths).toString(), cases: (cases[0].confirmed).toString(), deathsDaily: (cases[0].deaths_daily).toString(), population: (cases[0].population).toString()});
+                                    // adding total numbers if list has more than one (i.e., different states)
+                                    var total_number = getTotalNumber(cases);
+                                    countryList.unshift({id: (countryList.length + 1).toString(), country: value, casesDaily: (total_number[0]).toString(), deaths: (total_number[1]).toString(), cases: (total_number[2]).toString(), deathsDaily: (total_number[3]).toString(), population: (total_number[4]).toString()});
                                     AsyncStorage.setItem('countries', JSON.stringify(countryList));
                                 }
 
                                 //after addition
-                                console.log("from storeData: ", countryList);
+                                console.log("from storeData: \n", countryList);
                                 setStateTracker(countryList);
                                 settingInitialDataTracker(JSON.stringify(countryList));
-                                //getData();
+                                // scheduleNotification(JSON.stringify(countryList));
 
                             //error while doing something in the try block above
                             }catch(e){
@@ -83,134 +111,81 @@ export const storeData = async (value, setStateTracker, settingInitialDataTracke
 }
 
 
-//Getting cases data from JHU
-export const getData = async () =>{
+//                  Original getData()
+// //Getting cases data from JHU and returning data (here, 'dailyCases') to scheduling notifications
+// export const getData = async () =>{
+//     let dailyCases = [];
+//     AsyncStorage.getItem('countries')
+//     .then(countryList =>{
+//         if(countryList !== null){
+//             //converting string to an array of objects
+//             countryList = JSON.parse(countryList);
 
-    AsyncStorage.getItem('countries')
-    .then(countryList =>{
-
-        if(countryList !== null){
-            dailyCases = [];
-            //converting string to an array of objects
-            countryList = JSON.parse(countryList);
-
-            //getting previous day's date and validating it
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const date = `${yesterday.getFullYear()}-${yesterday.getMonth()+1 < 10 ? '0': ''}${yesterday.getMonth() + 1}-${yesterday.getDate() < 10 ? '0': ''}${yesterday.getDate()}`;
-
-            //looping through each choice to get their data
-            for(i = 0; i < countryList.length; i++){
-                const data = countryList[i].country;
-                if(data !== null){
-                    //fetching cases cases from JHU
-                    fetch(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/covid-19-qppza/service/REST-API/incoming_webhook/global?country=${data}&min_date=${date}&hide_fields=_id,%20country,%20country_code,%20country_iso2,%20country_iso3,%20loc,%20state,%20uid`)
-                    .then(response =>{
-                        if(response.status !== 200)
-                            console.log("Error occured when fetching data...");
-                        else{
-                            response.json()
-                            .then(cases =>{
-                                if(cases.length !== 0){
-                                    console.log(cases);
-                                    console.log('latest confirmed:', cases[0].confirmed_daily);
-                                    // dailyCases.push(cases[0].confirmed_daily);
-                                    // console.log(dailyCases);
-                                    // console.log("Country List:",countryList);
-                                    // for(x = 0; x < dailyCases.length; x++){
-                                    //     countryList[x]["Cases"] = dailyCases[x];
-                                    //     console.log(dailyCases[x]);
-                                    // }
-                                    // console.log("Country List atfer:",countryList);
-
-                                }else{
-                                    console.log("======================NO DATA==================");
-                                }
-                            })
-                        }
-                    })
+//             //getting previous day's date and validating it
+//             const today = new Date();
+//             const yesterday = new Date(today);
+//             yesterday.setDate(yesterday.getDate() - 1);
+//             const date = `${yesterday.getFullYear()}-${yesterday.getMonth()+1 < 10 ? '0': ''}${yesterday.getMonth() + 1}-${yesterday.getDate() < 10 ? '0': ''}${yesterday.getDate()-2}`;
+//             //looping through each choice to get their data
+//             for(i = 0; i < countryList.length; i++){
+//                 //variable recording the current index cause undefined behaviour to value of i
+//                 // const iter = i;
+//                 const data = countryList[i].country;
+//                 if(data !== null){
+//                     fetch(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/covid-19-qppza/service/REST-API/incoming_webhook/global?country=${data}&min_date=${date}&hide_fields=_id,%20country,%20country_code,%20country_iso2,%20country_iso3,%20loc,%20state,%20uid`)
+//                     .then(response =>{
+//                         if(response.status !== 200)
+//                             console.log("Error occured when fetching data...");
+//                         else{
+//                             response.json()
+//                             .then(cases =>{
+//                                 if(cases.length !== 0){
+//                                     dailyCases.push(cases);
+//                                 }else{
+//                                     console.log("======================NO DATA==================");
+//                                 }
+//                             })
+//                         }
+//                     })
                     
-                }else{
-                    console.log('Data at index ',i,' is empty...');
-                }
-            }
-        }else{
-            console.log("No data exists...");
-        }
-    })
-    .catch(e =>{
-        console.log('Error caught in retrieving data: ', e);
-    })
-    
-}
+//                 }else{
+//                     console.log('Data at index ',i,' is empty...');
+//                 }
+//             }
+//             // returning final data
+//             console.log("Here in getData");
+//             return dailyCases;
+//         }else{
+//             console.log("No country choices in asyncStorage...");
+//         return dailyCases;
+//         }
+//     })
+//     .catch(e =>{
+//         console.log('Error caught in retrieving data: ', e);
+//         return dailyCases;
+//     })
+//     console.log("Could return dailyCases");
+//     // returning an empty list if not returned the cases list before    
+// }
 
 
 export const deleteData = async (setStateTracker, settingInitialDataTracker, countryID) =>{
     //checking if have stored in storage the country list before
     AsyncStorage.getItem('countries')
     .then(countryList =>{
-
-        //Empty lists for countries and CountryList
-        countryListCopy = [];
-        selectedCountries = [];
-
-        selectedCountriesDailyCaseCount = [];
-        selectedCountriesDailyDeathCount = [];
-
-        selectedCountriesDeathCount = [];
-        selectedCountriesCaseCount = [];
-
-        selectedCountriesPopulation = [];
-        
         countryList = JSON.parse(countryList);
-        console.log(countryList);
         
-        //Getting list of selected countries
+        //Getting list of selected countries (doing a complete for loop incase user select one country multiple times)
         for(i = 0; i < countryList.length; i++){
-            selectedCountries.push(countryList[i].country);
-
-            selectedCountriesDailyCaseCount.push(countryList[i].casesDaily);
-            selectedCountriesDailyDeathCount.push(countryList[i].deathsDaily);
-
-            selectedCountriesDeathCount.push(countryList[i].deaths);
-            selectedCountriesCaseCount.push(countryList[i].cases);
-
-            selectedCountriesPopulation.push(countryList[i].population);
+            if(countryList[i].country === countryID){
+                countryList.splice(i, 1);
+                i--;
+            }else{
+                let temp = i+1;
+                countryList[i].id = temp.toString();
+            }
             
         }
-
-        //Logging selected countries
-        console.log(selectedCountries);
-
-        //Creating new Country List without the deleted Country
-        for (let i = 1; i < countryList.length+1; i++) {
-            if (i < parseInt(countryID)){
-                countryListCopy.push({id:(i).toString(), country: selectedCountries[i-1], casesDaily: selectedCountriesDailyCaseCount[i-1], deathsDaily: selectedCountriesDailyDeathCount[i-1] ,deaths: selectedCountriesDeathCount[i-1], cases: selectedCountriesCaseCount[i-1], population: selectedCountriesPopulation[i-1]});
-            } if (i > parseInt(countryID)) {
-                countryListCopy.push({id:(i-1).toString(), country: selectedCountries[i-2], casesDaily: selectedCountriesDailyCaseCount[i-2], deathsDaily: selectedCountriesDailyDeathCount[i-2], deaths: selectedCountriesDeathCount[i-2], cases: selectedCountriesCaseCount[i-2], population: selectedCountriesPopulation[i-2]})
-             } 
-             if ( i == parseInt(countryID)) {
-                selectedCountries.splice(parseInt(countryID)-1,1);
-
-                selectedCountriesDailyCaseCount.splice(parseInt(countryID)-1,1);
-                selectedCountriesDailyDeathCount.splice(parseInt(countryID)-1,1);
-
-                selectedCountriesDeathCount.splice(parseInt(countryID)-1,1);
-                selectedCountriesCaseCount.splice(parseInt(countryID)-1,1);
-
-                selectedCountriesPopulation.splice(parseInt(countryID)-1,1);
-                //console.log("Selected countries inside ELSE:",selectedCountries);
-                
-            }
-        }
-
-        //Logging selected countries and country List after deletion
-        console.log("Selected countries:",selectedCountries);
-        console.log("Country list copy:",countryListCopy);
-
-        countryList = countryListCopy;
-        console.log("new country list:",countryList);
 
         AsyncStorage.setItem('countries', JSON.stringify(countryList));
         setStateTracker(countryList);
@@ -225,45 +200,66 @@ export const deleteData = async (setStateTracker, settingInitialDataTracker, cou
 }
 
 
-//fetching cases (LOOK INTO THIS LATER!!)
-// const fetchData = (country= "", date="") => {
-//     //with date
-//     if(date.length > 0){
-//         fetch(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/covid-19-qppza/service/REST-API/incoming_webhook/global?country=${country}&min_date=${date}&hide_fields=_id,%20country,%20country_code,%20country_iso2,%20country_iso3,%20loc,%20state,%20uid`)
-//         .then(response =>{
-//             if(response.status !== 200)
-//                 throw new Error("Error while retrieving data from fetchData....")
-//             else{
-//                 response.json()
-//                 .then(cases => {
-//                     return(cases);
-//                 })
-//             }
-//         })
-//         .catch(e =>{
-//             console.log("Error retreiving data from fetchData:", e);
-//         })
 
-//     //without date
-//     }else{
-//         fetch(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/covid-19-qppza/service/REST-API/incoming_webhook/global?country=${country}&hide_fields=_id,%20country,%20country_code,%20country_iso2,%20country_iso3,%20loc,%20state,%20uid`)
-//         .then(response =>{
-//             if(response.status !== 200)
-//                 throw new Error("Error while retrieving data from fetchData....")
-//             else{
-//                 response.json()
-//                 .then(cases => {
-//                     return(cases);
-//                 })
-//             }
-//         })
-//         .catch(e =>{
-//             console.log("Error retreiving data from fetchData:", e);
-//         })
-//     }    
-// }
 
-// (async() =>{
-//     const cases = await fetchData("Argentina", "2021-08-28");
-//     console.log(cases); 
-// })()
+// function to get the total of deaths,cases,confirmed,etc.
+// format:
+// var total_number = [cases[0].confirmed_daily, cases[0].deaths, cases[0].confirmed, cases[0].deaths_daily, cases[0].population];
+function getTotalNumber(cases){
+    var confirmed_today = 0;
+    var deaths_today = 0;
+    var confirmed_total = 0;
+    var deaths_total = 0;
+    var total_pop = 0;
+    // getting the total numbers
+    for(i = 0; i<cases.length; i++){
+        confirmed_today += cases[i].confirmed_daily;
+        deaths_today += cases[i].deaths_daily;
+        confirmed_total += cases[i].confirmed;
+        deaths_total += cases[i].deaths;
+        total_pop += cases[i].population;
+    }
+    return [confirmed_today, deaths_total, confirmed_total, deaths_today, total_pop];
+}
+
+
+
+
+
+//                  TRIALS
+//Getting cases data from JHU and returning data (here, 'dailyCases') to scheduling notifications
+export const getData = async (countryName, daysFromToday, casesList, daysList, deathList) =>{
+    let dailyCases = [];
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - daysFromToday);
+    const date = `${yesterday.getFullYear()}-${yesterday.getMonth()+1 < 10 ? '0': ''}${yesterday.getMonth() + 1}-${yesterday.getDate() < 10 ? '0': ''}${yesterday.getDate()}`;
+        // //looping through each choice to get their data
+        // for(i = 0; i < countryListJson.length; i++){
+        //     const data = countryListJson[i].country;
+        //     if(data !== null){
+    // getting 'daysFromToday' number of cases in json format
+    const response = await(await fetch(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/covid-19-qppza/service/REST-API/incoming_webhook/global?country=${countryName}&min_date=${date}&hide_fields=_id,%20country,%20country_code,%20country_iso2,%20country_iso3,%20loc,%20state,%20uid`)).json();
+    if(response.length !== 0){
+        for(let i = 0; i<response.length; i++){
+            casesList.push((response[i].confirmed_daily < 0 ? 0 : response[i].confirmed_daily));
+            // removing the timezone mentioned in the string
+            daysList.push((response[i].date).slice(0, 10));
+            deathList.push(response[i].deaths_daily < 0 ? 0 : response[i].deaths_daily);
+            dailyCases.push(response[i]);
+        }
+    }else{
+        console.log("======================NO DATA==================getData()");
+    }
+        //     }else{
+        //         console.log('Data at index ',i,' is empty from getData()...');
+        //     }
+        // }
+        // console.log("Here in getData", dailyCases);
+    //     return JSON.stringify(dailyCases);
+    // }else{
+    //     console.log("No country choices in asyncStorage...");
+    // }
+    return JSON.stringify(dailyCases);
+}
+

@@ -6,6 +6,7 @@ export const globalStyle = StyleSheet.create({
         height: '8%',
     },
     headerText:{
+        fontFamily:'helvetica-neue-regular',
         color: '#fff',
         fontSize: 28,
         width: '100%',
@@ -27,7 +28,7 @@ export const globalStyle = StyleSheet.create({
         width:130,
         height:40,
         borderColor:"blue",  
-        },
+    },
     buttonBox: {
         marginTop: 20
     }

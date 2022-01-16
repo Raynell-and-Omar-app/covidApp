@@ -43,6 +43,7 @@ const styles= StyleSheet.create({
         // borderColor: 'white',
     },
     featureText1:{
+        fontFamily:'helvetica-neue-regular',
         color: 'white',
         fontSize: 30,
         textAlign: 'center',
@@ -50,6 +51,7 @@ const styles= StyleSheet.create({
         fontWeight: 'bold',
     },
     featureText2:{
+        fontFamily:'helvetica-neue-regular',
         color: 'white',
         fontSize: 30,
         textAlign: 'center',

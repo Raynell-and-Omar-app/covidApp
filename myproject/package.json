@@ -5,25 +5,36 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "clean:build:android": "rm -rf android/app/build",
+    "prod:android": "npm run clean:build:android  && react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.6",
-    "@react-native-community/masked-view": "^0.1.10",
+    "@react-native-community/masked-view": "0.1.10",
     "@react-navigation/drawer": "^6.1.4",
     "@react-navigation/native": "^6.0.2",
     "@react-navigation/stack": "^6.0.7",
     "expo": "~42.0.1",
+    "expo-app-loading": "1.1.2",
+    "expo-background-fetch": "~9.2.2",
+    "expo-notifications": "^0.12.3",
     "expo-status-bar": "~1.0.4",
+    "expo-task-manager": "~9.2.2",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-42.0.0.tar.gz",
+    "react-native-background-task": "^0.2.1",
+    "react-native-chart-kit": "^6.11.0",
     "react-native-country-picker-modal": "^2.0.0",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-modal": "^13.0.0",
     "react-native-reanimated": "^2.2.0",
     "react-native-safe-area-context": "^3.2.0",
-    "react-native-screens": "^3.4.0",
-    "react-native-web": "~0.13.12"
+    "react-native-screens": "~3.4.0",
+    "react-native-svg": "12.1.1",
+    "react-native-web": "~0.13.12",
+    "react-native-webview": "^11.16.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"

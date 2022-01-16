@@ -7,18 +7,22 @@ import { StatusBar } from 'expo-status-bar';
 export const Home = ({ navigation }) =>{
   //Features so far
   const features = [
-    {id: 1, name: "Country Tracker"},
-    {id: 2, name: "Symptoms"},
+    {id: 1, name: "Country Tracker", navigate:"Tracker"},
+    {id: 2, name: "Symptoms", navigate:"Symptoms"},
   ]
 
   return (
     
     <View style={globalStyle.screen}>
       <StatusBar hidden />
-      <ImageBackground source={require('../assets/imgs/corona3.jpg')} style={style.body}>
+      <ImageBackground 
+        source={require('../assets/imgs/corona3.jpg')} 
+        style={style.body}
+        blurRadius={5}
+      >
 
         {/* header */}
-        <View style={globalStyle.header}>
+        <View>
           <Text style={globalStyle.headerText}> COVID-19 App </Text>
         </View>
 
@@ -29,19 +33,11 @@ export const Home = ({ navigation }) =>{
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) =>{
                 //attaching appropriate onPress event handler based on feature pressed
-                if(item.id === 1){
-                  return(
-                    <TouchableOpacity onPress={() => navigation.navigate("Tracker")}>
-                            <HomeButtons id={item.id} name={item.name}/>
-                    </TouchableOpacity>
-                  )
-                }else{
-                  return(
-                    <TouchableOpacity onPress={() => navigation.navigate("Symptoms")}>
-                            <HomeButtons id={item.id} name={item.name}/>
-                    </TouchableOpacity>
-                  )
-                }
+                return(
+                  <TouchableOpacity onPress={() => navigation.navigate(item.navigate)}>
+                    <HomeButtons id={item.id} name={item.name}/>
+                  </TouchableOpacity>
+                )
               }}    
           />
         </View>
